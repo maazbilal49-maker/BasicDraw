@@ -130,8 +130,6 @@ int main(int argc, char **argv){
 
     bool erasing = false;
 
-    RenderTexture2D canvas = LoadRenderTexture(WIN_W, WIN_H);
-
     SetTargetFPS(120);
 
     int brushSize = 1.0f;
@@ -218,7 +216,7 @@ int main(int argc, char **argv){
 
         EndDrawing();
         if((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && IsKeyDown(KEY_S)){
-            Image image = LoadImageFromTexture(canvas.texture);
+            Image image = LoadImageFromScreen();
             ExportImage(image, "painting.png");
             UnloadImage(image);
         }
