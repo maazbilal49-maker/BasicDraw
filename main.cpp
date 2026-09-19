@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <filesystem>
 
 #define WIN_W 800
 #define WIN_H 600
@@ -24,6 +25,11 @@ typedef enum{
     COLOR_WHITE,
     COUNT
 }ColorState;
+
+bool endsWith(const std::string& str, const std::string& suffix){
+    if(suffix.size() > str.size()) return false;
+    return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
 
 void changeColor(Color& color, ColorState colorState){
     switch(colorState){
@@ -64,8 +70,18 @@ Color colorifyString(std::string color){
 }
 
 //saving to a .basicart file
-void saveAsBasicArt(std::vector<Circle>& circles){
-    std::ofstream file("painting.basicart");
+void saveAsBasicArt(std::vector<Circle>& circles, const char* filename){
+    std::ofstream file;
+    if(filename == NULL){
+        file.open("painting.basicart");
+    }else{
+        std::string str(filename);
+        if(!endsWith(str, ".basicart")){
+            file.open(str + ".basicart");
+        }else{
+            file.open(str);
+        }
+    }
 
     for(Circle& circle : circles){
         std::string color = stringifyColor(circle.color);
@@ -129,6 +145,7 @@ int main(int argc, char **argv){
     InitWindow((float)WIN_W, (float)WIN_H, "Raylib drawing simulator");
 
     bool erasing = false;
+    char* filename = NULL;
 
     SetTargetFPS(120);
 
@@ -142,8 +159,15 @@ int main(int argc, char **argv){
     camera.zoom = 1.0f;
 
     if(argc > 1){
-        char *filename = argv[1];
-        circles = loadBasicArtFile(filename);
+        filename = argv[1];
+        std::string str(filename);
+        std::filesystem::path path = filename;
+        if(endsWith(str, ".basicart")){
+            circles = loadBasicArtFile(filename);
+        }else{
+            std::cout << "Can only load .basicart files." << '\n';
+            return 1;
+        }
     }
 
     Color currentColor = BLACK;
@@ -222,7 +246,7 @@ int main(int argc, char **argv){
         }
 
         if((IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)) && IsKeyDown(KEY_S)){
-            saveAsBasicArt(circles);
+            saveAsBasicArt(circles, filename);
         }
     }
 
