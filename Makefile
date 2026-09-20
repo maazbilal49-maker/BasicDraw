@@ -2,7 +2,7 @@ CXX := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra
 LIBFLAGS := -lraylib -lopengl32 -lgdi32 -lwinmm
 
-FILES := main.cpp
+FILES := main.cpp utils.cpp
 TARGET := BasicDraw.exe
 
 $(TARGET): $(FILES)
