@@ -75,15 +75,21 @@ int main(int argc, char **argv){
             circles.clear();
         }
 
-        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){   
-            Vector2 mouseWorld = GetScreenToWorld2D(GetMousePosition(), camera);
+        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){\
+            if(erasing){
+                eraseAtMousePosition(circles, brushSize);
+            }   
 
-            circles.push_back(Circle{
-                mouseWorld.x,
-                mouseWorld.y,
-                currentColor,
-                (float)brushSize
-            });
+            else{
+                Vector2 mouseWorld = GetScreenToWorld2D(GetMousePosition(), camera);
+                circles.push_back(Circle{
+                    mouseWorld.x,
+                    mouseWorld.y,
+                    currentColor,
+                    (float)brushSize
+                });
+            }
+            
         }
 
         if(IsKeyPressed(KEY_BACKSPACE)){
@@ -98,12 +104,18 @@ int main(int argc, char **argv){
 
             BeginMode2D(camera);
 
-                drawCircles(circles);
 
-                if(!erasing)
+                if(!erasing){
                     DrawCircleV(GetScreenToWorld2D(mousePos, camera),
                                 brushSize,
                                 currentColor);
+                }
+                else{
+                    DrawRectangleLinesEx(Rectangle{GetScreenToWorld2D(mousePos, camera).x, GetScreenToWorld2D(mousePos, camera).y, brushSize, brushSize},
+                                        1.0f,
+                                        BLACK);
+                }
+                drawCircles(circles);
 
             EndMode2D();
 
