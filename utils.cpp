@@ -25,6 +25,10 @@ void changeColor(Color& color, ColorState colorState){
     }
 }
 
+void switchBrushState(BrushState& brushState){
+    brushState = static_cast<BrushState>((brushState + 1) % BRUSH_COUNT);
+}
+
 std::string stringifyColor(Color& color){
     if(ColorIsEqual(color, BLACK)) return "black";
     else if(ColorIsEqual(color, RED)) return "red";
@@ -35,12 +39,16 @@ std::string stringifyColor(Color& color){
     return "";
 }
 
-void eraseAtMousePosition(std::vector<Circle>& circles, float eraserRadius){
+void eraseAtMousePosition(Drawing& drawing, float eraserRadius){
     Vector2 mousePos = GetMousePosition();
 
-    circles.erase(std::remove_if(circles.begin(), circles.end(), [mousePos, eraserRadius](const Circle circle){
+    drawing.circles.erase(std::remove_if(drawing.circles.begin(), drawing.circles.end(), [mousePos, eraserRadius](const CircleBrush circle){
         return CheckCollisionCircles((Vector2){circle.x, circle.y}, circle.size, mousePos, eraserRadius);
-    }), circles.end());
+    }), drawing.circles.end());
+
+    drawing.rectangles.erase(std::remove_if(drawing.rectangles.begin(), drawing.rectangles.end(), [mousePos, eraserRadius](const RectangleBrush rectangle){
+        return CheckCollisionCircleRec(mousePos, eraserRadius, (Rectangle){rectangle.x, rectangle.y, rectangle.width, rectangle.height});
+    }), drawing.rectangles.end());
 }
 
 Color colorifyString(std::string color){
@@ -54,7 +62,7 @@ Color colorifyString(std::string color){
 }
 
 //saving to a .basicart file
-void saveAsBasicArt(std::vector<Circle>& circles, const char* filename){
+void saveAsBasicArt(Drawing& drawing, const char* filename){
     std::ofstream file;
     if(filename == NULL){
         file.open("painting.basicart");
@@ -67,14 +75,18 @@ void saveAsBasicArt(std::vector<Circle>& circles, const char* filename){
         }
     }
 
-    for(Circle& circle : circles){
+    for(CircleBrush& circle : drawing.circles){
         std::string color = stringifyColor(circle.color);
-        file << circle.x << " " << circle.y << " " << circle.size << " " << color << '\n';
+        file << "c " << circle.x << " " << circle.y << " " << circle.size << " " << color << '\n';
+    }
+    for(RectangleBrush& rectangle : drawing.rectangles){
+        std::string color = stringifyColor(rectangle.color);
+        file << "r " << rectangle.x << " " << rectangle.y << " " << rectangle.width << " " << rectangle.height << " " << color << '\n';
     }
 }   
 
 //loading basic art file, use const char* to load from command line arguments
-std::vector<Circle> loadBasicArtFile(const char *filename){
+Drawing loadBasicArtFile(const char *filename){
     std::ifstream file(filename);
     if(!file.is_open()){
         std::cerr << "Could not open file." << '\n';
@@ -83,29 +95,68 @@ std::vector<Circle> loadBasicArtFile(const char *filename){
 
     std::string line;
 
-    std::vector<Circle> result;
+    Drawing result;
+
+    char shapeType;
 
     while(std::getline(file, line)){
+        if(line.empty()){
+            continue;
+        }
+
         std::stringstream iss(line);
-        float x, y, size;
-        std::string strColor;
 
-        iss >> x >> y >> size;
-        iss >> strColor;
-        Color color = colorifyString(strColor);
+        iss >> shapeType;
 
-        Circle circle = {x, y, color, size};
+        if(shapeType == 'c'){
+            float x, y, size;
+            std::string strColor;
 
-        result.push_back(circle);
+            iss >> x >> y >> size >> strColor;
+            if(iss.fail()){
+                std::cerr << "Error reading line: " << line << '\n';
+                continue;
+            }
+
+            Color color = colorifyString(strColor);
+
+            CircleBrush circle = {x, y, color, size};
+            result.circles.push_back(circle);
+        }
+        else if(shapeType == 'r'){
+            float x, y, width, height;
+            std::string strColor;
+
+            iss >> x >> y >> width >> height >> strColor;
+            if(iss.fail()){
+                std::cerr << "Error reading line: " << line << '\n';
+                continue;
+            }
+
+            Color color = colorifyString(strColor);
+
+            RectangleBrush rectangle = {
+                x, y, color, width, height
+            };
+
+            result.rectangles.push_back(rectangle);
+        }
+        else{
+            std::cerr << "Unknown shape type in line: " << line << '\n';
+        }
     }
 
     return result;
 }
 
-void drawCircles(std::vector<Circle>& circles){
-    for(const Circle& circle : circles){
+void drawDrawing(Drawing& drawing){
+    for(const CircleBrush& circle : drawing.circles){
         
         DrawCircleV((Vector2){circle.x, circle.y}, circle.size, circle.color);
+    }
+    for(const RectangleBrush& rectangle : drawing.rectangles){
+        
+        DrawRectangleV((Vector2){rectangle.x, rectangle.y}, (Vector2){rectangle.width, rectangle.height}, rectangle.color);
     }
 }
 

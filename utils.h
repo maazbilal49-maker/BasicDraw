@@ -6,7 +6,18 @@ typedef struct{
     float x, y;
     Color color;
     float size;
-}Circle;
+}CircleBrush;
+
+typedef struct{
+    float x, y;
+    Color color;
+    float width, height;
+}RectangleBrush;
+
+typedef struct{
+    std::vector<CircleBrush> circles;
+    std::vector<RectangleBrush> rectangles;
+}Drawing;
 
 typedef enum{
     COLOR_BLACK,
@@ -14,17 +25,24 @@ typedef enum{
     COLOR_GREEN,
     COLOR_BLUE,
     COLOR_WHITE,
-    COUNT
+    COLOR_COUNT
 }ColorState;
+
+typedef enum{
+    STATE_CIRCLE,
+    STATE_RECTANGLE,
+    BRUSH_COUNT
+}BrushState;
 
 bool endsWith(const std::string& str, const std::string& suffix);
 void changeColor(Color& color, ColorState colorState);
+void switchBrushState(BrushState& brushState);
 std::string stringifyColor(Color& color);
-void eraseAtMousePosition(std::vector<Circle>& circles, float eraserRadius);
+void eraseAtMousePosition(Drawing& drawing, float eraserRadius);
 Color colorifyString(std::string color);
-void saveAsBasicArt(std::vector<Circle>& circles, const char* filename);
-std::vector<Circle> loadBasicArtFile(const char *filename);
-void drawCircles(std::vector<Circle>& circles);
+void saveAsBasicArt(Drawing& drawing, const char* filename);
+Drawing loadBasicArtFile(const char *filename);
+void drawDrawing(Drawing& drawing);
 void zoomAtCursor(float zoomFactor, Camera2D& camera, Vector2 mouseScreen);
 
 #endif
