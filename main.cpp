@@ -18,12 +18,12 @@ int main(int argc, char **argv){
 
     bool erasing = false;
     char* filename = NULL;
-
+    BrushState brushState = STATE_CIRCLE;
     SetTargetFPS(120);
 
     int brushSize = 1.0f;
 
-    std::vector<Circle> circles;
+    Drawing drawing;
 
     Camera2D camera = {0};
     camera.target = (Vector2){WIN_W/2.0f, WIN_H/2.0f};
@@ -35,7 +35,7 @@ int main(int argc, char **argv){
         std::string str(filename);
         std::filesystem::path path = filename;
         if(endsWith(str, ".basicart")){
-            circles = loadBasicArtFile(filename);
+            drawing = loadBasicArtFile(filename);
         }else if(path.has_extension()){
             std::cout << "Can only load .basicart files." << '\n';
             return 1;
@@ -59,35 +59,52 @@ int main(int argc, char **argv){
         }
 
         if(IsKeyPressed(KEY_N)){
-            colorState = static_cast<ColorState>((colorState + 1) % COUNT);
+            colorState = static_cast<ColorState>((colorState + 1) % COLOR_COUNT);
             changeColor(currentColor, colorState);
+        }
+
+        if(IsKeyPressed(KEY_B)){
+            switchBrushState(brushState);
         }
 
         if((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && IsKeyDown(KEY_KP_ADD)){
             brushSize = std::min(brushSize + 1, 100);
-        }
+        } 
 
         if((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && IsKeyDown(KEY_KP_SUBTRACT)){
             brushSize = std::max(1, brushSize - 1);
         }
 
         if(IsKeyDown(KEY_C)){
-            circles.clear();
+            drawing.circles.clear();
+            drawing.rectangles.clear();
         }
 
-        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){\
+        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
             if(erasing){
-                eraseAtMousePosition(circles, brushSize);
+                eraseAtMousePosition(drawing, brushSize);
             }   
 
             else{
                 Vector2 mouseWorld = GetScreenToWorld2D(GetMousePosition(), camera);
-                circles.push_back(Circle{
-                    mouseWorld.x,
-                    mouseWorld.y,
-                    currentColor,
-                    (float)brushSize
-                });
+                if(brushState == STATE_CIRCLE){
+                    drawing.circles.push_back(CircleBrush{
+                        mouseWorld.x,
+                        mouseWorld.y,
+                        currentColor,
+                        (float)brushSize
+                    });
+                }
+                else if(brushState == STATE_RECTANGLE){
+
+                    drawing.rectangles.push_back(RectangleBrush{
+                        mouseWorld.x,
+                        mouseWorld.y,
+                        currentColor,
+                        (float)brushSize,
+                        (float)brushSize
+                    });
+                }
             }
             
         }
@@ -106,16 +123,23 @@ int main(int argc, char **argv){
 
 
                 if(!erasing){
-                    DrawCircleV(GetScreenToWorld2D(mousePos, camera),
+                    if(brushState == STATE_CIRCLE){
+                        DrawCircleV(GetScreenToWorld2D(mousePos, camera),
                                 brushSize,
                                 currentColor);
+                    }
+                    else if(brushState == STATE_RECTANGLE){
+                        DrawRectangleV(GetScreenToWorld2D(mousePos, camera),
+                                (Vector2){brushSize, brushSize},
+                                currentColor);
+                    }
                 }
                 else{
                     DrawRectangleLinesEx(Rectangle{GetScreenToWorld2D(mousePos, camera).x, GetScreenToWorld2D(mousePos, camera).y, brushSize, brushSize},
                                         1.0f,
                                         BLACK);
                 }
-                drawCircles(circles);
+                drawDrawing(drawing);
 
             EndMode2D();
 
@@ -130,7 +154,7 @@ int main(int argc, char **argv){
         }
 
         if((IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)) && IsKeyDown(KEY_S)){
-            saveAsBasicArt(circles, filename);
+            saveAsBasicArt(drawing, filename);
         }
     }
 
