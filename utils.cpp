@@ -22,6 +22,23 @@ void changeColor(Color& color, ColorState colorState){
         case COLOR_GREEN: color = GREEN; break;
         case COLOR_BLUE: color = BLUE; break;
         case COLOR_WHITE: color = WHITE; break;
+        case COLOR_YELLOW: color = YELLOW; break;
+        case COLOR_CYAN: color = Color{0, 255, 255, 255}; break;
+        case COLOR_MAGENTA: color = MAGENTA; break;
+        case COLOR_ORANGE: color = ORANGE; break;
+        case COLOR_PURPLE: color = PURPLE; break;
+        case COLOR_PINK: color = PINK; break;
+        case COLOR_BROWN: color = BROWN; break;
+        case COLOR_GRAY: color = GRAY; break;
+        case COLOR_LIGHTGRAY: color = LIGHTGRAY; break;
+        case COLOR_DARKGRAY: color = DARKGRAY; break;
+        case COLOR_GOLD: color = GOLD; break;
+        case COLOR_SILVER: color = Color{192, 192, 192, 255}; break;
+        case COLOR_NAVY: color = Color{0, 0, 128, 255}; break;
+        case COLOR_TEAL: color = Color{0, 128, 128, 255}; break;
+        case COLOR_OLIVE: color = Color{128, 128, 0, 255}; break;
+        case COLOR_MAROON: color = MAROON; break;
+        default: color = BLACK; break;
     }
 }
 
@@ -35,6 +52,22 @@ std::string stringifyColor(Color& color){
     else if(ColorIsEqual(color, GREEN)) return "green";
     else if(ColorIsEqual(color, BLUE)) return "blue";
     else if(ColorIsEqual(color, WHITE)) return "white";
+    else if(ColorIsEqual(color, YELLOW)) return "yellow";
+    else if(ColorIsEqual(color, Color{0, 255, 255, 255})) return "cyan";
+    else if(ColorIsEqual(color, MAGENTA)) return "magenta";
+    else if(ColorIsEqual(color, ORANGE)) return "orange";
+    else if(ColorIsEqual(color, PURPLE)) return "purple";
+    else if(ColorIsEqual(color, PINK)) return "pink";
+    else if(ColorIsEqual(color, BROWN)) return "brown";
+    else if(ColorIsEqual(color, GRAY)) return "gray";
+    else if(ColorIsEqual(color, LIGHTGRAY)) return "lightgray";
+    else if(ColorIsEqual(color, DARKGRAY)) return "darkgray";
+    else if(ColorIsEqual(color, GOLD)) return "gold";
+    else if(ColorIsEqual(color, Color{192, 192, 192, 255})) return "silver";
+    else if(ColorIsEqual(color, Color{0, 0, 128, 255})) return "navy";
+    else if(ColorIsEqual(color, Color{0, 128, 128, 255})) return "teal";
+    else if(ColorIsEqual(color, Color{128, 128, 0, 255})) return "olive";
+    else if(ColorIsEqual(color, MAROON)) return "maroon";
 
     return "";
 }
@@ -57,6 +90,26 @@ Color colorifyString(std::string color){
     else if(color == "green") return GREEN;
     else if(color == "blue") return BLUE;
     else if(color == "white") return WHITE;
+    else if(color == "yellow") return YELLOW;
+    else if(color == "cyan") return Color{0, 255, 255, 255};
+    else if(color == "magenta") return MAGENTA;
+    else if(color == "orange") return ORANGE;
+    else if(color == "purple") return PURPLE;
+    else if(color == "pink") return PINK;
+    else if(color == "brown") return BROWN;
+    else if(color == "gray") return GRAY;
+    else if(color == "lightgray") return LIGHTGRAY;
+    else if(color == "darkgray") return DARKGRAY;
+    else if(color == "gold") return GOLD;
+    else if(color == "silver") return Color{192, 192, 192, 255};
+    else if(color == "navy") return Color{0, 0, 128, 255};
+    else if(color == "teal") return Color{0, 128, 128, 255};
+    else if(color == "olive") return Color{128, 128, 0, 255};
+    else if(color == "maroon") return MAROON;
+    else{
+        std::cerr << "Unknown color: " << color << '\n';
+        return BLACK;
+    }
 
     return BLACK;
 }
